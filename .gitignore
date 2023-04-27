@@ -1,0 +1,15 @@
+*.log
+*/images
+*/images.tar.gz
+*._images
+
+*/titles
+*/titles.tar.gz
+correctness_check.py
+
+.venv
+.vs
+app.py
+client_backup.py
+helper.py
+helper2.py
