@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import uuid
 
+
 app = FastAPI()
 
 
@@ -44,17 +45,6 @@ class TaskStatusRep(BaseModel):
         self.task_id = task_id
         self.status = status
 
-
-def register_function(regfun: RegisterFn) -> RegisterFnRep:
-    pass
-
-def execute_function(exefun: ExecuteFnReq) -> ExecuteFnRep:
-    pass
-
-def get_status(task_id: uuid.UUID) -> TaskStatusRep:
-    pass
-
-
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
@@ -67,10 +57,38 @@ def read_item(item_id: int, q: Union[str, None] = None):
 def update_item(item_id: int, item: Item):
     return {"item_name": item.name, "item_id": item_id}
 
-@app.get("/status/{status_id}")
-def get_status(status_id: int):
+
+# def register_function(regfun: RegisterFn) -> RegisterFnRep:
+#     pass
+# def execute_function(exefun: ExecuteFnReq) -> ExecuteFnRep:
+#     pass
+# def get_status(task_id: uuid.UUID) -> TaskStatusRep:
+#     pass
+
+
+
+
+@app.put("/register_function{}")
+
+@app.get("/status/{task_id}")
+def get_status(task_id: uuid.UUID):
     status = ""
-    return 
+    TaskStatusRep(task_id=task_id, status=status)
+    return TaskStatusRep
+
+
+
+
+
+import dill
+import codecs
+
+def serialize(obj) -> str:
+    return codecs.encode(dill.dumps(obj), "base64").decode()
+
+def deserialize(obj: str):
+    return dill.loads(codecs.decode(obj.encode(),"base64"))
+
 
 # uvicorn zzz_learnfastapi:app --reload
 # go to http://127.0.0.1:8000 to see the return message in the function that's appended @app.get("/")
