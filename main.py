@@ -32,10 +32,7 @@ def register(func: RegisterFn) -> RegisterFnRep:
 async def register_function(func: RegisterFn) -> RegisterFnRep:
     return register(func)
 
-# code_compiled = compile("print(x+y)","func1","exec")
-# param="x=1;y=2"
-# exec(param)
-# exec(code_compiled)
+
 
 def execute(func_w_param: ExecuteFnReq) -> ExecuteFnRep:
     func_id = str(func_w_param.function_id)
