@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 import uuid
+import pickle
+import codecs
 
 class RegisterFn(BaseModel):
     name: str
@@ -33,4 +35,11 @@ class TaskStatusRep(BaseModel):
     # def __init__(self, task_id: uuid.UUID, status: str):
     #     self.task_id = task_id
     #     self.status = status
+
+
+def serialize(obj) -> str:
+    return codecs.encode(pickle.dumps(obj), "base64").decode()
+
+def deserialize(obj: str):
+    return pickle.loads(codecs.decode(obj.encode(),"base64"))
 
