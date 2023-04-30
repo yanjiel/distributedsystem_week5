@@ -8,6 +8,7 @@ import types
 
 app = FastAPI()
 r = redis.Redis()
+STATUS = {'QUEUED':'QUEUED', 'RUNNING':'RUNNING', 'COMPLETE':'COMPLETE', 'FAILURE':'FAILURE'}
 
 def register(func: RegisterFn) -> RegisterFnRep:
     # print(func.name, func.payload) #"func1", "gASVFgAAAAAAAACMCF9fbWFpbl9flIwFZnVuYzGUk5Qu\n" = codecs.encode(pickle.dumps(func1), "base64").decode()
@@ -28,11 +29,6 @@ def register(func: RegisterFn) -> RegisterFnRep:
 
 
 
-@app.post('/register_function/')
-async def register_function(func: RegisterFn) -> RegisterFnRep:
-    return register(func)
-
-
 
 def execute(func_w_param: ExecuteFnReq) -> ExecuteFnRep:
     func_id = str(func_w_param.function_id)
@@ -47,6 +43,7 @@ def execute(func_w_param: ExecuteFnReq) -> ExecuteFnRep:
     print(type(func_body), func_body)
     print(type(param), param)
     
+    # spin up dispatcher to get work done
     if isinstance(func_body, types.FunctionType):
         func_body(*param)
     elif isinstance(func_body, str):
@@ -56,10 +53,31 @@ def execute(func_w_param: ExecuteFnReq) -> ExecuteFnRep:
     else:
         raise RuntimeError("Deserialized function is of the wrong type.")
     
+    # save task future into the db
+    # todo
+
     task_id = str(uuid.uuid4())
     while task_id in r.keys():
         task_id = str(uuid.uuid4())
     return {"task_id": uuid.UUID(task_id)}
+
+
+def status(task_id: uuid.UUID) -> TaskStatusRep:
+    task_info = json.loads(r.get(str(task_id)))
+    print(task_info)
+    status = STATUS['COMPLETE']
+    # future = task_info[0]
+    # if future:
+    #     status = STATUS['COMPLETE']
+    # else:
+    #     status = STATUS['RUNINNG']
+
+    return {'task_id': uuid.UUID(task_id), 'status': status}
+
+
+@app.post('/register_function/')
+async def register_function(func: RegisterFn) -> RegisterFnRep:
+    return register(func)
 
 
 @app.post('/execute_fuction/')
@@ -67,5 +85,12 @@ async def execute_function(func_w_param: ExecuteFnReq) -> ExecuteFnRep:
     return execute(func_w_param)
 
 
+@app.post('/status/')
+async def get_status(task_id: uuid.UUID) -> TaskStatusRep:
+    return status(task_id)
+
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", port=5000, log_level="info")
+    
